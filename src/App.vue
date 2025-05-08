@@ -3,7 +3,7 @@ import { ref } from "vue";
 import ComponentsPreview from "./components/ComponentsPreview.vue";
 import SensorExplorer from "./components/SensorExplorer.vue";
 
-const showPreview = ref(true);
+const showPreview = ref(false);
 </script>
 
 <template>
