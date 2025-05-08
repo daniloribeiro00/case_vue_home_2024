@@ -5,20 +5,21 @@ import CustomLoader from "./CustomLoader.vue";
 import Summary from "./Summary.vue";
 import CustomSelect from "./CustomSelect.vue";
 import CustomList from "./CustomList.vue";
+import SensorGroups from "./SensorGroups.vue";
 
 const isLoading = ref(true);
-const groupsBySensor = ref<GroupsBySensor>({
+const groupsBySensorData = ref<GroupsBySensor>({
   customer: "",
   groupsBySensor: {},
 });
 
-const selectSensor = ref<string | undefined>(undefined);
+const selectedSensor = ref<string | undefined>(undefined);
 const sensorOptions = ref<string[]>([]);
 
 async function getData() {
   try {
     const data = await api.fetchGroupsBySensor();
-    groupsBySensor.value = data;
+    groupsBySensorData.value = data;
     sensorOptions.value = Object.keys(data.groupsBySensor);
   } catch (error) {
     console.error("Unable to get data:", error);
@@ -38,26 +39,28 @@ getData();
       </div>
       <div v-else class="content">
         <Summary
-          :customer="groupsBySensor.customer ?? ''"
-          :groupsBySensor="groupsBySensor.groupsBySensor ?? {}"
+          :customer="groupsBySensorData.customer ?? ''"
+          :groupsBySensor="groupsBySensorData.groupsBySensor ?? {}"
         />
-        <div class="sensor">
+        <span class="sensor-select">
           <p>Sensor</p>
-          <CustomSelect v-model="selectSensor" :options="sensorOptions" />
+          <CustomSelect v-model="selectedSensor" :options="sensorOptions" />
           <p>is composed by:</p>
-        </div>
+        </span>
         <Transition name="fade" mode="out-in">
-          <CustomList
-            v-if="selectSensor"
-            :listData="groupsBySensor.groupsBySensor[selectSensor]"
-          />
+          <div v-if="selectedSensor" class="sensor-info">
+            <CustomList
+              :listData="groupsBySensorData.groupsBySensor[selectedSensor]"
+            />
+            <SensorGroups
+              :sensor="selectedSensor"
+              :groups="groupsBySensorData.groupsBySensor"
+            />
+          </div>
         </Transition>
       </div>
     </Transition>
   </div>
-
-  <!-- TODO: Uncomment once part 1 is complete -->
-  <!-- <SensorGroups /> -->
 </template>
 
 <style scoped>
@@ -92,12 +95,16 @@ getData();
   padding: 2.5rem;
 }
 
-.sensor {
+.sensor-select {
   display: flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
   gap: 1rem;
   width: 85%;
+}
+
+.sensor-info {
+  width: 100%;
 }
 </style>
